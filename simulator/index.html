@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <link rel="icon" href="data:,">
+  <title>双页桌面屏模拟器</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="device.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <main class="workspace">
+    <section class="preview-panel" aria-label="虚拟设备">
+      <div class="intro"><span class="eyebrow">DESKTOP MONITOR / PREVIEW</span><h1>桌面信息，一眼可见。</h1><p>480 × 480 屏幕交互预览 · 左右滑动切换页面</p></div>
+      <div class="device-frame"><div class="screen-viewport"><div class="screen" id="screen" role="region" tabindex="0" aria-label="桌面屏模拟器。左右滑动或按方向键切换，点击屏幕刷新">
+        <header class="topline"><div class="brand"><span id="page-title">桌面</span></div><div class="connection"><span class="dot" id="status-dot"></span><span id="status">连接中</span></div></header>
+        <section id="page-clock" class="device-page clock-page" aria-label="时间与天气">
+          <div class="clock-main"><div class="clock-time" id="clock-time">--:--</div><div class="clock-date-line"><span class="clock-date" id="clock-date">--月--日</span><span class="clock-weekday" id="clock-weekday">星期--</span></div></div>
+          <div class="weather-card"><div class="weather-city" id="weather-city">天气未配置</div><div class="weather-current"><div class="weather-icon" id="weather-icon">☀</div><div class="weather-condition" id="weather-condition">--</div><div class="weather-temp" id="weather-temperature">--</div></div><div class="weather-details"><span>最高 <b id="weather-high">--</b>　最低 <b id="weather-low">--</b></span><span>湿度 <b id="weather-humidity">--</b></span></div></div>
+          <div class="weather-updated" id="weather-updated">等待天气数据</div>
+        </section>
+        <section id="page-codex" class="device-page" aria-label="Codex 额度" hidden>
+          <div class="page-heading"><span>剩余额度</span><span class="page-subtitle page-update">等待数据</span></div>
+          <div class="quota-card"><div class="card-header"><span class="window">5 小时额度</span><span class="quota-figure cyan-text"><span class="quota-value" id="five-value">--</span>%</span></div><div class="track"><div id="five-bar" class="bar cyan"></div></div><div class="quota-details"><span class="reset" id="five-reset">重置时间 --</span><span class="countdown" id="five-countdown">--</span></div></div>
+          <div class="quota-card"><div class="card-header"><span class="window">每周额度</span><span class="quota-figure violet-text"><span class="quota-value" id="weekly-value">--</span>%</span></div><div class="track"><div id="weekly-bar" class="bar violet"></div></div><div class="quota-details"><span class="reset" id="weekly-reset">重置时间 --</span><span class="countdown" id="weekly-countdown">--</span></div></div>
+        </section>
+        <footer class="screen-footer"><span id="updated">等待数据</span><nav class="page-dots" aria-label="页面切换"><button class="page-dot active" aria-label="时间天气" aria-current="page" data-page="0"></button><button class="page-dot" aria-label="Codex 额度" data-page="1"></button></nav><span class="touch-hint">轻触刷新</span></footer>
+      </div></div></div>
+      <div class="page-selector" role="group" aria-label="选择预览页面"><button type="button" class="page-select active" data-page="0">时间天气</button><button type="button" class="page-select" data-page="1">Codex 额度</button></div>
+      <div class="preview-note"><span class="note-dot"></span> 浏览器示意预览 · 固件文字与排版以实机为准</div>
+    </section>
+    <aside class="controls"><div class="control-heading"><span class="eyebrow">SIMULATOR</span><h2>调试面板</h2><p>连接电脑端服务，或切换场景检查屏幕显示。</p></div>
+      <label for="endpoint">数据接口</label><input id="endpoint" type="url" placeholder="http://127.0.0.1:8787/api/status" spellcheck="false">
+      <label for="api-token">访问令牌 <span class="optional">可选</span></label><input id="api-token" type="password" autocomplete="off" placeholder="仅保存在当前页面内">
+      <button class="primary" id="live">连接并刷新 <span>↗</span></button>
+      <div class="divider"><span>模拟数据</span></div>
+      <div class="scenarios"><button data-scenario="normal" class="scenario">正常状态</button><button data-scenario="low" class="scenario">额度不足</button><button data-scenario="partial" class="scenario">部分不可用</button><button data-scenario="offline" class="scenario">离线状态</button></div>
+      <div class="details"><span class="details-label">数据来源</span><span id="source">正在连接</span><span class="details-label">最近更新</span><span id="last-update">--</span></div>
+      <p class="help">左右滑动屏幕切换页面，轻触屏幕刷新。也可用下方按钮或键盘方向键。实时模式每 30 秒刷新；离线保留上次结果。模拟数据仅用于界面测试。</p>
+    </aside>
+  </main>
+</body>
+</html>

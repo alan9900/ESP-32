@@ -1,0 +1,14 @@
+.pio/
+.venv/
+.env
+.env.*
+*.pem
+*.key
+__pycache__/
+*.py[cod]
+firmware/src/config.h
+backend/config.local.json
+firmware/dist/
+*.bin
+*.elf
+*.log
