@@ -12,3 +12,8 @@ firmware/dist/
 *.bin
 *.elf
 *.log
+
+# Local device identifiers and Bluetooth-specific local configuration
+ble/**/config.local.json
+ble/**/device.local.json
+ble/**/config.h
