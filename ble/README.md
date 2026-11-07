@@ -1,23 +1,44 @@
-# 独立蓝牙方案
+# 蓝牙版：Codex 天气桌面屏
 
-此目录是独立开发中的蓝牙版本：`dashboard/` 是独立的双页面固件，`ble_backend/` 是电脑端天气与 Codex 数据采集，`pc/` 是 Windows 蓝牙发送程序，`firmware/` 是仅用于模拟数据测试的独立探针。原项目的 `firmware/` 和 `backend/` 保持 Wi-Fi 方案。
+蓝牙版由 Windows 电脑采集天气和 Codex 额度，经 BLE 发送给开发板。开发板无需连接 Wi-Fi；电脑需要联网、开启蓝牙并在通信范围内持续运行发送程序。固定型号的开发板和 Windows 电脑已实测两页显示、触摸切换、PIN 配对及真实数据；长期运行、断电恢复和异常安全场景仍需进一步验证。
 
-蓝牙版的开发板不需要连接 Wi-Fi；电脑需要开启蓝牙并保持本机程序运行，且通过自身网络获取天气和 Codex 数据。电脑与开发板需要处于蓝牙通信距离内。电脑端只发送白名单显示字段；ChatGPT 凭据不会发送给开发板。
+目录中的 `dashboard/` 是双页面固件，`ble_backend/` 是电脑端数据采集，`pc/` 是蓝牙发送程序；`firmware/` 是仅用于调试连接的 `BLE TEST` 探针，**日常使用请烧录 `dashboard/`**。Wi-Fi 方案另见 [wifi/](../wifi/README.md)。
 
-2026-11-07 在指定开发板和 Windows 电脑上，完成了双页面固件编译、烧录，经过认证的蓝牙连接，以及模拟数据和真实天气、Codex 两项额度显示测试；使用者确认两页能左右切换。连续运行稳定性、断电后自动恢复、未配对设备读写拒绝和异常重配对仍需进一步验证。
+## 安装与烧录
 
-## 电脑端启动
-
-设备已安装本目录的蓝牙双页面固件、在 Windows 中用设备屏幕 PIN 完成配对，且 Python 环境安装了 `ble/pc/requirements.txt` 之后，在项目根目录执行：
+准备微雪 ESP32-C6-Touch-AMOLED-2.16、USB 数据线、具备蓝牙的 Windows 电脑、Python 3.10+ 和已使用 ChatGPT 账号登录的 Codex CLI。建议将仓库放在简短的英文路径。**以下命令均在仓库根目录运行**，首次编译需要下载 PlatformIO 工具链和依赖：
 
 ```powershell
-.\ble\pc\start_live.ps1
+py -3 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install platformio -r .\ble\pc\requirements.txt
+.\.venv\Scripts\python.exe -m platformio run --project-dir .\ble\dashboard
 ```
 
-首次配对时，在未连接状态下长按开发板触摸屏约 2 秒并松开，进入限时配对窗口；在 Windows 蓝牙设置中选择添加蓝牙设备 `ESP32-C6-Desk`，在系统提示框输入板上显示的六位 PIN。不要将 PIN 发到聊天或写进日志。如果超时，可以重新长按触摸屏。已配对设备通常可直接重连；若配对关系不一致，需按 Windows 和设备端实际状态排查，勿随意擦除 Flash。
+连接开发板，在设备管理器中查看 COM 端口，将下面的 `COM5` 替换为实际端口。烧录会覆盖板上应用和相关分区；如需保留现有固件、启动器或数据，请先备份并验证备份。不要随意整片擦除 Flash。
 
-启动脚本查找项目内 Python 环境；也可以通过 `-PythonPath` 指定安装了 Bleak 的 Python。脚本在后台启动发送端，电脑必须联网且能够运行已登录的 `codex`。设备不需连接 Wi-Fi，但必须在蓝牙范围内。采集间隔约 60 秒，发送约 30 秒一次；首次启动可能要等一次采集和发送。
+```powershell
+.\.venv\Scripts\python.exe -m platformio run --project-dir .\ble\dashboard --target upload --upload-port COM5
+```
 
-电脑重新启动后需要重新运行该命令，本版本未设置开机自启。仅扫描到一个匹配服务时才会尝试连接；发送真实数据前还会检查 Windows 认证配对和受保护的 GATT 读取。屏幕离线时检查电脑蓝牙、发送端及配对状态。日志只记录状态，不记录配对码和额度内容。
+烧录后等待设备重启；如果仍是旧画面，可以短按 RESET/RST 或拔插 USB。进一步排查和回刷见[烧录指南](../docs/FLASHING.md)。
 
-蓝牙方案的应用固件与 Wi-Fi 方案存放在不同目录，但一块开发板一次只能运行一套应用。切换回 Wi-Fi 须重新烧录根目录 `firmware/` 的 Wi-Fi 固件，相关配置继续保留在本机。
+## 配对与运行
+
+1. 首次配对时，在开发板未连接状态下长按触摸屏约 2 秒并松开，打开限时配对窗口。
+2. 在 Windows 蓝牙设置中选择“添加设备”，选择 `ESP32-C6-Desk`，在系统提示框输入开发板屏幕显示的六位 PIN。不要公开配对码；超时后可重新长按屏幕。
+3. 在仓库根目录启动电脑端发送程序：
+
+   ```powershell
+   powershell -NoProfile -ExecutionPolicy Bypass -File .\ble\pc\start_live.ps1
+   ```
+
+电脑端约每 60 秒采集、每 30 秒发送一次。首次启动请等待采集和发送；屏幕的“模拟数据”表示测试值，“--”或离线状态表示当前数据不可用。电脑重启后需要重新运行启动命令，本版本没有设置开机自启。`start_live.ps1` 使用仓库根目录 `.venv`，也支持通过 `-PythonPath` 指定已安装 Bleak 的其他 Python。
+
+## 安全和排查
+
+- 电脑必须能够通过 PATH 找到 `codex`，并使用有 Codex 额度的 ChatGPT 账号登录。Codex 接口或账号状态变化可能影响数据读取。
+- 电脑端只发送显示所需的白名单字段；认证凭据保留在电脑。发送前检查 Windows 认证配对和受保护的 GATT 读取；仅发现一个匹配设备并不代表已验证身份。
+- 如果屏幕显示离线，检查电脑蓝牙、后台程序、配对状态及设备距离。程序会尝试断线重连；某些系统配对问题仍可能需要人工排查。不要随意擦除 Flash。
+- 电脑端日志保存在仓库的 `.project_storage/ble/`，只记录程序状态。不要分享配对码、个人配置或账户信息。
+
+代码和依赖许可详见[仓库许可说明](../THIRD_PARTY.md)，本目录也保留参考项目、显示驱动及字库的许可文件。

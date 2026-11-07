@@ -1,19 +1,18 @@
 .pio/
 .venv/
+__pycache__/
+*.py[cod]
 .env
 .env.*
 *.pem
 *.key
-__pycache__/
-*.py[cod]
-firmware/src/config.h
-backend/config.local.json
-firmware/dist/
 *.bin
 *.elf
 *.log
-
-# Local device identifiers and Bluetooth-specific local configuration
+.project_storage/
+wifi/firmware/src/config.h
+wifi/backend/config.local.json
+wifi/firmware/dist/
+ble/**/config.h
 ble/**/config.local.json
 ble/**/device.local.json
-ble/**/config.h

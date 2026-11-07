@@ -6,7 +6,7 @@
 #include <lvgl.h>
 #define XPOWERS_CHIP_AXP2101
 #include <XPowersLib.h>
-#include "../../../firmware/src/waveshare_lcd.h"
+#include "../../dashboard/src/waveshare_lcd.h"
 #include "ble_transport.h"
 
 namespace {

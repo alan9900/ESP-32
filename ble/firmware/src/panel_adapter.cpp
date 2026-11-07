@@ -1,2 +1,2 @@
 // Reuse the working hardware-specific LVGL display transport.
-#include "../../../firmware/src/waveshare_lcd.cpp"
+#include "../../dashboard/src/waveshare_lcd.cpp"

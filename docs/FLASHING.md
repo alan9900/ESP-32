@@ -7,14 +7,15 @@
 1. 使用能传输数据的 USB 线连接电脑并稳定供电，在 Windows 设备管理器中确认开发板 COM 端口。示例中的 `COM5` 必须换成实际端口；如果串口监视器占用端口，先关闭它。
 2. 烧录会覆盖板上程序及所写入的 Flash 区域，可能影响原有启动器或程序。若需要保留出厂系统、个人数据或其他固件，先依据[微雪官方资料和示例](https://docs.waveshare.net/ESP32-C6-Touch-AMOLED-2.16/Resources-And-Documents)自行完成备份并验证备份；不要随意整片擦除 Flash，避免丢失配置及配对数据。
 3. 安装 Python 3.9+、PlatformIO 和 Codex CLI，确认 Codex 使用自己的 ChatGPT 账号登录。推荐将仓库放在简短英文路径，避免部分 Windows 工具链不兼容中文路径。首次编译需要网络下载依赖。
-4. 开发板连接 2.4 GHz Wi-Fi；电脑与板子需可通过局域网互访。访客网络或热点的客户端隔离、Windows 防火墙及电脑 IP 变化都可能造成离线。
-5. 运行根目录 `setup_local.py` 创建个人配置。`firmware/src/config.h`、`backend/config.local.json` 和编译后的固件含个人网络信息或局域网访问令牌，必须留在本机，不要提交、分享或截图泄露。配置示例和源码可以公开。
+4. Wi-Fi 版的开发板连接 2.4 GHz Wi-Fi；电脑与板子需可通过局域网互访。访客网络或热点的客户端隔离、Windows 防火墙及电脑 IP 变化都可能造成离线。
+5. 运行 `wifi/setup_local.py` 创建个人配置。`wifi/firmware/src/config.h`、`wifi/backend/config.local.json` 和编译后的固件含个人网络信息或局域网访问令牌，必须留在本机，不要提交、分享或截图泄露。配置示例和源码可以公开。
 
 ## 编译与烧录 Wi-Fi 版
 
-从仓库根目录的 PowerShell 运行，详细的准备和交互式配置见[首页](../README.md)：
+先从仓库根目录进入 `wifi/`，在该目录的 PowerShell 中运行。详细准备和交互式配置见 [Wi-Fi 版说明](../wifi/README.md)：
 
 ```powershell
+cd wifi
 py -3 -m venv .venv
 .\.venv\Scripts\python.exe -m pip install platformio
 .\.venv\Scripts\python.exe setup_local.py
@@ -32,15 +33,16 @@ py -3 -m venv .venv
 
 ## 编译与烧录蓝牙版
 
-蓝牙版使用同一个硬件驱动，但项目目录独立。按首页准备好项目 `.venv` 后，在仓库根目录运行，`COM5` 替换成实际端口：
+蓝牙版使用独立目录内的硬件驱动。以下命令从仓库根目录运行，`COM5` 替换成实际端口；蓝牙版使用仓库根目录的 `.venv`，与 `wifi/.venv` 独立：
 
 ```powershell
-.\.venv\Scripts\python.exe -m pip install -r .\ble\pc\requirements.txt
+py -3 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install platformio -r .\ble\pc\requirements.txt
 .\.venv\Scripts\python.exe -m platformio run --project-dir .\ble\dashboard
 .\.venv\Scripts\python.exe -m platformio run --project-dir .\ble\dashboard --target upload --upload-port COM5
 ```
 
-上传目标会写入固件及相关启动和分区区域，替换板上应用；不要对正在使用的板误操作。若 Windows 未配对，按 [蓝牙说明](../ble/README.md)进行 PIN 配对；之后运行 `.\ble\pc\start_live.ps1` 启动电脑端。蓝牙版在本项目指定开发板上已显示真实天气及 Codex 额度，但其他设备和长期运行尚未完整验证。Wi-Fi 本地配置和源码不会因切换蓝牙而删除，回刷方法见下方。
+上传目标会写入固件及相关启动和分区区域，替换板上应用；不要对正在使用的板误操作。若 Windows 未配对，按 [蓝牙说明](../ble/README.md)进行 PIN 配对；之后在仓库根目录运行 `powershell -NoProfile -ExecutionPolicy Bypass -File .\ble\pc\start_live.ps1` 启动电脑端。蓝牙版在本项目指定开发板上已显示真实天气及 Codex 额度，但其他设备和长期运行尚未完整验证。Wi-Fi 本地配置和源码不会因切换蓝牙而删除，回刷方法见下方。
 
 ## 常见问题
 
