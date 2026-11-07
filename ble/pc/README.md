@@ -1,6 +1,6 @@
 # Windows 蓝牙发送端隔离原型
 
-`demo_sender.py` 仅向测试版 ESP32 BLE 外设发送**构造的模拟数据**，不会读取账户信息或任何 Key。另有尚未实机验收的 `live_sender.py`，用于准备后续真实数据接入；在设备认证和恢复测试通过前不应运行它。编译、配对、链路加密和完整真机通信均需分别验证；不能因 `pair=True` 就认为连接具备认证保护，尤其不能把模拟测试成功视为可以传输真实数据。
+`demo_sender.py` 仅发送**构造的模拟数据**，不会读取账户信息或任何 Key。`live_sender.py` 通过经过认证的连接发送天气与 Codex 显示字段；`auto_live.py` 负责发现附近唯一的显示设备并调用它，`start_live.ps1` 用于后台启动。2026-11-07 已在指定 Windows 电脑和开发板验证真实数据显示；未配对读写拒绝、异常重配对和长期运行稳定性仍需进一步验证。
 
 ## 协议
 
@@ -20,8 +20,8 @@ py -3 -m unittest -v test_protocol
 
 实际蓝牙探针依赖 `bleak`；建议安装进独立虚拟环境。首先长按探针的触摸屏开启限时配对，再在 Windows 蓝牙设置中配对 `ESP32-C6-Desk`，仅在 Windows 系统提示框输入开发板屏幕显示的六位码；不要把配对码写入聊天或日志。之后运行 `demo_sender.py --once`。当前 Bleak 3.0.1 的 Windows 自动配对实现只处理 `CONFIRM_ONLY`，因此探针不使用 `pair=True` 来代替 PIN 配对。2026-10-29 在用户的板子上验证过 PIN 配对、认证加密、模拟数据完整发送与重连。探针发送演示值并标注 `mode=mock`，不会使用真实数据。
 
-后续接入真实数据之前，必须完成 Windows 与设备端**经过认证的加密配对**及未配对读写拒绝验证、已绑定设备识别、断开和重连、过期状态、时钟设置和实机资源测试。`protocol.make_payload` 是字段白名单纯函数，没有任何数据读取功能；不要自行向未经验证的蓝牙连接发送真实账户摘要。
+使用真实数据前，必须完成 Windows 与设备端**经过认证的加密配对**；还应进一步验证未配对读写拒绝、异常重配对、断开和重连、过期状态、时钟设置和长期实机资源情况。`protocol.make_payload` 是字段白名单纯函数，没有任何数据读取功能；不要自行向未经验证的蓝牙连接发送真实账户摘要。
 
-准备中的 `live_sender.py` 使用 `ble/ble_backend/` 内独立的本机数据采集代码，不依赖 Wi-Fi 方案的数据服务或令牌。它要求明确选择设备地址，在 Windows 上检查配对保护级别，为读写特征设置加密和认证要求，再进行受保护的状态读取；验证失败时不启动真实数据采集。Windows 服务发现强制绕过旧缓存。当前真实数据的完整显示、断线恢复和独立固件仍需实机验收，且依赖固定的 Bleak Windows 后端行为。
+`live_sender.py` 使用 `ble/ble_backend/` 内独立的本机数据采集代码，不依赖 Wi-Fi 方案的数据服务或令牌。它要求明确选择设备地址，在 Windows 上检查配对保护级别，为读写特征设置加密和认证要求，再进行受保护的状态读取；验证失败时不启动真实数据采集。Windows 服务发现强制绕过旧缓存。`auto_live.py` 只有发现唯一匹配设备时才启动上述认证流程；自动发现本身不代表身份验证。本方案依赖固定的 Bleak Windows 后端行为，升级后需要重新验证。
 
 参考：[Bleak 客户端](https://bleak.readthedocs.io/en/stable/api/client.html)、[Windows GATT](https://learn.microsoft.com/en-us/windows/apps/develop/devices-sensors/gatt-client)、[ESP32-C6 BLE](https://docs.espressif.com/projects/esp-idf/en/latest/esp32c6/api-guides/ble/overview.html)。

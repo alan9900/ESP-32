@@ -1,6 +1,6 @@
 # 开发板烧录与恢复指南
 
-本指南面向微雪 **ESP32-C6-Touch-AMOLED-2.16**、Windows 和仓库中经过实机验证的 **Wi-Fi 版**。其他 ESP32-C6 板即便芯片相同，也可能使用不同显示、电源、触摸和引脚，不应直接套用。蓝牙方案目前为开发原型，见 [开发状态](DEVELOPMENT_STATUS.md)。
+本指南面向微雪 **ESP32-C6-Touch-AMOLED-2.16**、Windows 和仓库中经过实机验证的 **Wi-Fi 版**。其他 ESP32-C6 板即便芯片相同，也可能使用不同显示、电源、触摸和引脚，不应直接套用。蓝牙版基本链路已实测，详见 [开发状态](DEVELOPMENT_STATUS.md)。
 
 ## 烧录前
 
@@ -29,6 +29,18 @@ py -3 -m venv .venv
 ```
 
 保持电脑端窗口运行，等待约一分钟进行首次采集，然后检查桌面、Codex 页面、天气和剩余额度，左右滑动切页。轻点屏幕可以提前刷新；`--` 表示当前数据不可用。电脑端需要能够通过 PATH 找到 `codex`，天气服务与 Codex 接口须可访问。
+
+## 编译与烧录蓝牙版
+
+蓝牙版使用同一个硬件驱动，但项目目录独立。按首页准备好项目 `.venv` 后，在仓库根目录运行，`COM5` 替换成实际端口：
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -r .\ble\pc\requirements.txt
+.\.venv\Scripts\python.exe -m platformio run --project-dir .\ble\dashboard
+.\.venv\Scripts\python.exe -m platformio run --project-dir .\ble\dashboard --target upload --upload-port COM5
+```
+
+上传目标会写入固件及相关启动和分区区域，替换板上应用；不要对正在使用的板误操作。若 Windows 未配对，按 [蓝牙说明](../ble/README.md)进行 PIN 配对；之后运行 `.\ble\pc\start_live.ps1` 启动电脑端。蓝牙版在本项目指定开发板上已显示真实天气及 Codex 额度，但其他设备和长期运行尚未完整验证。Wi-Fi 本地配置和源码不会因切换蓝牙而删除，回刷方法见下方。
 
 ## 常见问题
 
